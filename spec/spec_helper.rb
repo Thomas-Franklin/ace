@@ -2,6 +2,8 @@
 
 require "bundler/setup"
 
+RSPEC_ROOT = File.dirname __dir__
+
 if ENV['COVERAGE'] == 'yes'
   require 'simplecov'
   require 'simplecov-console'

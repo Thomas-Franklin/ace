@@ -3,7 +3,9 @@
 require 'ace/fork_util'
 require 'bolt/executor'
 require 'bolt/inventory'
+require 'ace/plugin_cache'
 require 'bolt/target'
+require 'bolt_server/file_cache'
 require 'bolt/task'
 require 'bolt_server/file_cache'
 require 'json'
@@ -15,7 +17,12 @@ module ACE
     def initialize(config = nil)
       @config = config
       @executor = Bolt::Executor.new(0, load_config: false)
+      cache_dir = config['cache-dir'].dup
+      @tasks_dir = File.join(cache_dir, 'tasks')
       @file_cache = BoltServer::FileCache.new(@config).setup
+      @environments_dir = File.join(cache_dir, 'environments')
+      config['cache-dir'].sub!(cache_dir, @environments_dir)
+      @plugins = ACE::PluginCache.new(@config).setup
 
       @schemas = {
         "run_task" => JSON.parse(File.read(File.join(__dir__, 'schemas', 'ace-run_task.json'))),
@@ -93,6 +100,10 @@ module ACE
       error = validate_schema(@schemas["execute_catalog"], body)
       return [400, error.to_json] unless error.nil?
 
+      result = ForkUtil.isolate do
+        @plugins.sync(body['compiler']['environment'])
+      end
+
       # simulate expected error cases
       if body['compiler']['certname'] == 'fail.example.net'
         [200, { _error: {
@@ -113,7 +124,9 @@ module ACE
           details: 'upstream api errors go here'
         } }.to_json]
       else
-        [200, '{}']
+        [200, { _success: {
+          msg: result
+        } }.to_json]
       end
     end
   end

@@ -14,6 +14,9 @@ group :development do
   gem 'bolt', git: 'https://github.com/puppetlabs/bolt', branch: 'master'
   gem 'github_changelog_generator', '~> 1.14'
   gem 'pry-byebug'
+  gem 'pry-remote'
+  gem 'puppet', path: '/Users/thomas.franklin/puppet/puppet'
+  gem 'webmock'
 end
 
 # Specify your gem's dependencies in agentless-catalog-executor.gemspec

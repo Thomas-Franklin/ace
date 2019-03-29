@@ -6,11 +6,15 @@ require 'bolt_server/base_config'
 module ACE
   class Config < BoltServer::BaseConfig
     def config_keys
-      super + %w[concurrency cache-dir file-server-conn-timeout file-server-uri]
+      super + %w[concurrency cache-dir file-server-conn-timeout file-server-uri ssl-ca-crls]
     end
 
     def env_keys
-      super + %w[concurrency file-server-conn-timeout file-server-uri]
+      super + %w[concurrency file-server-conn-timeout file-server-uri ssl-ca-crls]
+    end
+
+    def ssl_keys
+      super + %w[ssl-ca-crls]
     end
 
     def int_keys
