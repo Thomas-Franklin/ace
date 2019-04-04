@@ -114,6 +114,21 @@ module ACE
       end
     end
 
+    # returns a hash of trusted facts that will be used
+    # to request a catalog for the target
+    def self.trusted_facts(certname)
+      # assumes that the certname will be a valid FQDN
+      hostname, domain = certname.split('.', 2)
+      trusted_facts = {
+        "authenticated": "remote",
+        "extensions": {},
+        "certname": certname,
+        "hostname": hostname
+      }
+      trusted_facts[:domain] = domain if domain
+      trusted_facts
+    end
+
     get "/" do
       200
     end
@@ -203,7 +218,7 @@ module ACE
         Puppet.override(ssl_context: ssl_context, http_pool: pool, loaders: Puppet::Pops::Loaders.new(env), configured_environment: environment) do
           ACE::TransportApp.init_puppet_target(certname, body['target']['remote-transport'], body['target'])
           configurer = Puppet::Configurer.new(body['compiler']['transaction_uuid'], body['compiler']['job_id'])
-          configurer.run(:network_device => true, :pluginsync => false, :trusted_facts => ACE::TransportApp.trusted_facts(certname)
+          configurer.run(:network_device => true, :pluginsync => false, :trusted_facts => ACE::TransportApp.trusted_facts(certname))
         end
       end
 
