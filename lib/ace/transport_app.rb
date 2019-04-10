@@ -216,6 +216,7 @@ module ACE
         pool = Puppet::Network::HTTP::NoCachePool.new
         env = Puppet::Node::Environment.remote(environment)
         Puppet.override(ssl_context: ssl_context, http_pool: pool, loaders: Puppet::Pops::Loaders.new(env), configured_environment: environment) do
+          Puppet::Transaction::Report.indirection.terminus_class = :rest
           ACE::TransportApp.init_puppet_target(certname, body['target']['remote-transport'], body['target'])
           configurer = Puppet::Configurer.new(body['compiler']['transaction_uuid'], body['compiler']['job_id'])
           configurer.run(:network_device => true, :pluginsync => false, :trusted_facts => ACE::TransportApp.trusted_facts(certname))
